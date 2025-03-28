@@ -1,0 +1,46 @@
+---
+import { siteInfo } from '../consts/site-info';
+import './src/styles/global.css'
+import { ClientRouter } from 'astro:transitions'
+
+interface props{
+	title: string;
+	image?: string;
+	description?: string;
+}
+
+const { title = siteInfo.title,
+	description = siteInfo.description,
+	image,
+ } = Astro.props
+---
+
+
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image" href="/pokeball.png" />
+		<meta name="generator" content={Astro.generator} />
+		<!--SEO -->
+		<meta name="description" content={description} />
+		<meta name="author" content={'Ariel Marchegiani'} />
+	
+		
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={image} />
+
+
+		<title>{title}</title>
+		<ClientRouter />
+	</head>
+	<body class="bg-slate-800 text-slate-100 m-auto max-w-5xl">
+		<main class="mt-4">
+			<slot />
+		</main>
+	</body>
+</html>
+

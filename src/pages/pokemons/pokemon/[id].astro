@@ -1,0 +1,137 @@
+---
+import type { GetStaticPaths } from "astro";
+import Layout from "../../../layouts/Layout.astro";
+import PokemonCard from "../../../components/PokemonCard.astro";
+import type { PokemonListResponse, PokemonDetailResponse, PokemonStat } from "../../../interfaces/pokemon-list-response";
+
+
+// Objeto de mapeo para traducir las estadísticas al español
+const statTranslations: Record<string, string> = {
+    hp: "❤️ Puntos de salud",
+    attack: "⚔️ Ataque",
+    defense: "🛡️ Defensa",
+    "special-attack": "🌟 Ataque especial",
+    "special-defense": "🧿 Defensa especial",
+    speed: "⚡ Velocidad",
+};
+
+// Objeto de mapeo para traducir los tipos de Pokémon al español y asignar emojis
+const typeTranslations: Record<string, { name: string; emoji: string }> = {
+    normal: { name: "Normal", emoji: "⚪" },
+    fire: { name: "Fuego", emoji: "🔥" },
+    water: { name: "Agua", emoji: "💧" },
+    grass: { name: "Planta", emoji: "🌱" },
+    electric: { name: "Eléctrico", emoji: "⚡" },
+    ice: { name: "Hielo", emoji: "❄️" },
+    fighting: { name: "Lucha", emoji: "🥊" },
+    poison: { name: "Veneno", emoji: "☠️" },
+    ground: { name: "Tierra", emoji: "🌍" },
+    flying: { name: "Volador", emoji: "🕊️" },
+    psychic: { name: "Psíquico", emoji: "🔮" },
+    bug: { name: "Bicho", emoji: "🐛" },
+    rock: { name: "Roca", emoji: "🪨" },
+    ghost: { name: "Fantasma", emoji: "👻" },
+    dragon: { name: "Dragón", emoji: "🐉" },
+    dark: { name: "Siniestro", emoji: "🌑" },
+    steel: { name: "Acero", emoji: "⚙️" },
+    fairy: { name: "Hada", emoji: "✨" },
+};
+
+// Función para determinar la clase CSS según el valor de la estadística
+const getBarColor = (value: number): string => {
+    if (value < 30) return "bg-red-500"; // Menor de 30: rojo
+    if (value < 60) return "bg-yellow-500"; // Entre 30 y 60: amarillo
+    if (value < 90) return "bg-green-500"; // Entre 60 y 90: verde
+    return "bg-violet-500"; // Mayor o igual a 90: blanco
+};
+
+const resp = await fetch('https://pokeapi.co/api/v2/pokemon/?limit=151');
+    const { results } = await resp.json() as PokemonListResponse;
+    console.log(results);
+
+export const getStaticPaths = (async () => {
+
+    const resp = await fetch('https://pokeapi.co/api/v2/pokemon/?limit=151');
+    const { results } = await resp.json() as PokemonListResponse;
+
+    return results.map(({name, url}) => {
+         const id = url.split('/').at(-2);
+    
+        return {
+                params: {id: id}, 
+                props: {name: name, url: url},
+            }
+    });
+}) satisfies GetStaticPaths;
+
+const { id } = Astro.params;
+const { url, name }  = Astro.props;
+
+// Hacer una solicitud para obtener las estadísticas del Pokémon
+const pokemonResp = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+const pokemonData = await pokemonResp.json() as PokemonDetailResponse;
+
+// Extraer las estadísticas del Pokémon
+const stats = pokemonData.stats.map((stat) => ({
+    name: statTranslations[stat.stat.name] || stat.stat.name,
+    base: stat.base_stat,
+}));
+
+// Extraer y traducir los tipos del Pokémon
+const types = pokemonData.types.map((type) => {
+    const typeInfo = typeTranslations[type.type.name];
+    return typeInfo ? `${typeInfo.emoji} ${typeInfo.name}` : type.type.name;
+});
+
+---
+
+<Layout title=`Pokemon Static | ${name} || 'Pokemon Static | Home'` >
+    <section class="flex flex-col ">
+        
+        <div>
+            <a href="/" class="hover:underline hover:text-blue-500 mb-2">Volver</a>
+            <h1 class="text-3xl mb-2 capitalize">#{id} {name}</h1>
+            <hr class="mb-4"/>
+        </div>
+
+        <div class="flex justify-between">  
+            <div>
+        <PokemonCard name={name} url={url} isBig/>
+
+         <!-- Mostrar los tipos del Pokémon -->
+         <div class="my-4 justify-items-center">
+            <h2 class="text-2xl mb-4 text-s font-extrabold">Tipos</h2>
+            <ul class="flex gap-2">
+                {types.map((type) => (
+                    <li class="bg-slate-600 px-4 py-2 rounded-full text-2xl font-bold">
+                        {type}
+                    </li>
+                ))}
+            </ul>
+        </div>
+    </div>
+
+        <!-- Traer las estadisticas y crear unas barras de estadisticas -->
+        <!-- Mostrar las estadísticas del Pokémon -->
+        <div class="my-4 mb-10">
+            <h2 class="text-2xl mt-9 mb-4 font-extrabold">Estadísticas</h2>
+            <ul>
+                {stats.map((stat) => (
+                    <li class="mb-2">
+                        <span class="capitalize font-bold text-xl">{stat.name}:</span>
+                        <span class="text-xl items-end">{stat.base}</span>
+                        <div class="border-2 w-101 rounded-full border-gray-900">
+                        <div class="w-100 bg-gray-300 rounded-full h-5">
+                            <div
+                                class={`h-5 rounded-full ${getBarColor(stat.base)}`}
+                                style={`width: ${stat.base}%`}
+                            ></div>
+                        </div>
+                    </div>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    </div>
+    </section>
+</Layout>
