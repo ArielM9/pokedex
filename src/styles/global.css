@@ -5,5 +5,10 @@
   }
   
   .btn-disabled {
-    @apply bg-gray-600 text-gray-400;
+    @apply bg-gray-600 text-gray-400 ;
   }
+
+  #btn-favorite {
+        @apply hover:animate-pulse;
+        @apply hover:cursor-pointer
+    }

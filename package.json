@@ -1,0 +1,23 @@
+{
+  "name": "01-fundation",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/solid-js": "^5.0.7",
+    "@tailwindcss/vite": "^4.0.17",
+    "astro": "^5.5.5",
+    "astro-icon": "^1.1.5",
+    "solid-js": "^1.9.5",
+    "tailwindcss": "^4.0.17"
+  },
+  "devDependencies": {
+    "postcss": "^8.5.3",
+    "postcss-nested": "^7.0.2"
+  }
+}

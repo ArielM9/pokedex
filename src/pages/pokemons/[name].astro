@@ -3,6 +3,9 @@ import type { GetStaticPaths } from "astro";
 import Layout from "../../layouts/Layout.astro";
 import PokemonCard from "../../components/PokemonCard.astro";
 import type { PokemonListResponse, PokemonDetailResponse, PokemonStat } from "../../interfaces/pokemon-list-response";
+import Title from "../../shared/Title.astro";
+import { Icon } from "astro-icon/components";
+import '../../styles/global.css';
 
 
 // Objeto de mapeo para traducir las estadísticas al español
@@ -82,26 +85,33 @@ const types = pokemonData.types.map((type) => {
     return typeInfo ? `${typeInfo.emoji} ${typeInfo.name}` : type.type.name;
 });
 
+const tiposPlural = types.length > 1;
+
 const imgSrc = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
 const nameCapitalized = name.charAt(0).toUpperCase() + name.slice(1);
 ---
 
 <Layout title=`Pokemon | ${nameCapitalized}` description=`Página de detalle del Pokémon ${name}` image={imgSrc}>
-    <section class="flex flex-col ">
-        
+    <section class="flex flex-col">
+    <div class="flex flex-row items-center gap-4 ml-4">
         <div>
             <a href="/" class="hover:underline hover:text-blue-500 mb-2">Volver</a>
-            <h1 class="text-3xl mb-2 capitalize">#{id} {name}</h1>
-            <hr class="mb-4"/>
+            <Title>{name}</Title>
+            
         </div>
+        <button id="btn-favorite" class="" data-name={name} data-id={id}>
+            <Icon name="star-full" size={25} class="hidden" data-full/>
+            <Icon name="star-outline" size={25} data-outline/>
 
-        <div class="flex justify-between">  
+        </button>
+    </div>
+        <div class="flex md:justify-between flex-col md:flex-row ">  
             <div>
         <PokemonCard name={name} url={url} isBig/>
 
          <!-- Mostrar los tipos del Pokémon -->
          <div class="my-4 justify-items-center">
-            <h2 class="text-2xl mb-4 text-s font-extrabold">Tipos</h2>
+            <h2 class="text-2xl mb-4 text-s font-extrabold">{tiposPlural ? 'Tipos' : 'Tipo'}</h2>
             <ul class="flex gap-2">
                 {types.map((type) => (
                     <li class="bg-slate-600 px-4 py-2 rounded-full text-2xl font-bold">
@@ -114,7 +124,7 @@ const nameCapitalized = name.charAt(0).toUpperCase() + name.slice(1);
 
         <!-- Traer las estadisticas y crear unas barras de estadisticas -->
         <!-- Mostrar las estadísticas del Pokémon -->
-        <div class="my-4 mb-10">
+        <div class="my-4 mb-10 place-items-center md:place-items-baseline">
             <h2 class="text-2xl mt-9 mb-4 font-extrabold">Estadísticas</h2>
             <ul>
                 {stats.map((stat) => (
@@ -136,3 +146,64 @@ const nameCapitalized = name.charAt(0).toUpperCase() + name.slice(1);
     </div>
     </section>
 </Layout>
+
+<script>
+    interface FavoritePokemon {
+        id: number;
+        name: string;
+    }
+
+
+const handlePageLoad = () => {
+
+    let favoritePokemons:FavoritePokemon[] = JSON.parse(localStorage.getItem('favorites') ?? '[]')
+
+    const btnFavorite = document.querySelector('#btn-favorite') as HTMLButtonElement;
+    if (!btnFavorite) return;
+    const name = btnFavorite.dataset.name ?? '';
+    const id = btnFavorite.dataset.id ?? '';
+    
+    const favOutline = btnFavorite.querySelector('[data-outline]') as HTMLElement;
+    const favFull = btnFavorite.querySelector('[data-full]') as HTMLElement;
+
+    const localFavorite = () => {
+        const isFavorite = favoritePokemons.some(fav => fav.name === name)
+        if (isFavorite){
+            favOutline.classList.toggle('hidden');
+            favFull.classList.remove('hidden');
+        }
+    }
+
+    localFavorite()
+
+    const toggleFavorite = () => {
+
+        const isFavorite = favoritePokemons.some(fav => fav.name === name)
+
+        if (isFavorite){
+            //Eliminar pokemon de favoritos
+            favoritePokemons =favoritePokemons.filter(fav => fav.name !== name)
+        } else {
+            //Agregar pokemon a favoritos
+            favoritePokemons.push({
+                id: +id,
+                name: name
+            })
+        }
+
+        localStorage.setItem('favorites', JSON.stringify(favoritePokemons))
+    }
+    
+    
+    btnFavorite.addEventListener('click', ()=>{
+        favOutline.classList.toggle('hidden');
+        favFull.classList.toggle('hidden');
+
+        toggleFavorite()
+    })
+}
+
+document.addEventListener('astro:page-load', handlePageLoad)
+
+
+</script>

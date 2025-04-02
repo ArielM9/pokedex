@@ -1,5 +1,7 @@
 ---
 import { siteInfo } from '../consts/site-info';
+import Hero from '../shared/Hero.astro';
+import NavBar from '../shared/NavBar.astro';
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions'
 
@@ -37,8 +39,12 @@ const { title = siteInfo.title,
 		<title>{title}</title>
 		<ClientRouter />
 	</head>
-	<body class="bg-slate-800 text-slate-100 m-auto max-w-5xl">
-		<main class="mt-4">
+	<body class="bg-slate-800 text-slate-100 ">
+		<header >
+			<NavBar />
+		</header>
+	
+		<main class="mt-4 m-auto max-w-5xl">
 			<slot />
 		</main>
 	</body>
