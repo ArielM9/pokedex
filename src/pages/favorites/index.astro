@@ -1,5 +1,5 @@
 ---
-import PokemonCard from "../../components/PokemonCard.astro";
+import { FavoritePokemons } from "../../components/FavoritePokemons";
 import Layout from "../../layouts/Layout.astro";
 import Title from "../../shared/Title.astro";
 
@@ -18,5 +18,5 @@ import Title from "../../shared/Title.astro";
                 ))
             }
     </section> -->
-
+    <FavoritePokemons client:only="solid-js"/>
 </Layout>
